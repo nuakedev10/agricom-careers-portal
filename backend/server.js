@@ -4,28 +4,35 @@ const path = require('path');
 const multer = require('multer');
 const { Pool } = require('pg');
 const fs = require('fs');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '../.env') }); // Look for .env in parent folder
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- DATABASE CONFIGURATION ---
+// Debug: Check environment variables
+console.log('🔧 Environment Check for Render:');
+console.log('PORT:', PORT);
+console.log('DB_HOST exists:', !!process.env.DB_HOST);
+console.log('DB_USER exists:', !!process.env.DB_USER);
+console.log('DB_NAME exists:', !!process.env.DB_NAME);
+
+// --- DATABASE CONFIGURATION FOR RENDER ---
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
+    user: process.env.DB_USER || 'agricom_admin',
+    host: process.env.DB_HOST || 'dpg-d54gm3ngi27c73ea1b80-a.oregon-postgres.render.com',
+    database: process.env.DB_NAME || 'agricom_applications',
+    password: process.env.DB_PASSWORD || 'BMrYHlxdqIzhPk01cG8ANm6Vggsyy7bq',
     port: process.env.DB_PORT || 5432,
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+    ssl: { rejectUnauthorized: false } // Render PostgreSQL requires SSL
 });
 
 // Test Database Connection
-pool.connect((err, client, release) => {
-    if (err) {
-        return console.error('❌ Error acquiring client', err.stack);
-    }
-    console.log('✅ Connected to PostgreSQL Database');
-    release();
+pool.on('connect', () => {
+    console.log('✅ Connected to PostgreSQL Database on Render');
+});
+
+pool.on('error', (err) => {
+    console.error('❌ PostgreSQL pool error:', err);
 });
 
 // --- CREATE TABLE FUNCTION ---
@@ -55,19 +62,9 @@ const createTable = async () => {
             notes TEXT
         )`;
     
-    const createIndexes = `
-        CREATE INDEX IF NOT EXISTS idx_email ON applications(email);
-        CREATE INDEX IF NOT EXISTS idx_position ON applications(position);
-        CREATE INDEX IF NOT EXISTS idx_status ON applications(status);
-    `;
-    
     try {
         await pool.query(createTableQuery);
-        console.log('✅ Applications table created or already exists');
-        
-        await pool.query(createIndexes);
-        console.log('✅ Indexes created or already exist');
-        
+        console.log('✅ Applications table ready');
     } catch (error) {
         console.error('❌ Error creating table:', error.message);
     }
@@ -76,7 +73,7 @@ const createTable = async () => {
 // Initialize table on server start
 createTable();
 
-// --- FILE UPLOAD CONFIGURATION (MULTER) ---
+// --- FILE UPLOAD CONFIGURATION ---
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -94,7 +91,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 // --- MIDDLEWARE ---
@@ -102,23 +99,39 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from the frontend folder
+// Serve static files - IMPORTANT: Adjust paths for Render
 app.use(express.static(path.join(__dirname, '../frontend')));
-// Serve uploaded files so admin can view them
 app.use('/uploads', express.static(uploadDir));
 
-// --- API ROUTES ---
-
-// Health check endpoint
+// --- HEALTH CHECK ENDPOINTS ---
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
         timestamp: new Date().toISOString(),
-        database: 'Connected'
+        service: 'Agricom Careers Backend'
     });
 });
 
-// Submit Application Route
+app.get('/api/db-check', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT NOW() as db_time');
+        res.json({
+            status: 'OK',
+            database: 'Connected',
+            db_time: result.rows[0].db_time
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'ERROR',
+            database: 'Disconnected',
+            error: error.message
+        });
+    }
+});
+
+// --- APPLICATION ROUTES ---
+
+// Submit Application
 app.post('/api/applications', upload.fields([
     { name: 'cv', maxCount: 1 },
     { name: 'coverLetter', maxCount: 1 }
@@ -126,17 +139,13 @@ app.post('/api/applications', upload.fields([
     console.log('📥 Received application submission');
     
     try {
-        // Log all form data for debugging
-        console.log('📋 Form data:', req.body);
-        console.log('📁 Files:', req.files);
-        
         const {
             fullName, email, phone, location, alxStatus, position, 
             education, currentRole, experience, technicalSkills, 
             domainKnowledge, portfolioLink, motivation, consent
         } = req.body;
 
-        // Handle skills - can be string or array
+        // Handle skills
         let skills = req.body.skills;
         let skillsArray = [];
         
@@ -144,19 +153,13 @@ app.post('/api/applications', upload.fields([
             if (Array.isArray(skills)) {
                 skillsArray = skills;
             } else if (typeof skills === 'string') {
-                skillsArray = skills.split(',').map(s => s.trim());
+                skillsArray = [skills];
             }
         }
-        
-        console.log('🎯 Skills array:', skillsArray);
 
         const cvFilename = req.files && req.files['cv'] ? req.files['cv'][0].filename : null;
         const coverLetterFilename = req.files && req.files['coverLetter'] ? req.files['coverLetter'][0].filename : null;
 
-        console.log('📄 CV filename:', cvFilename);
-        console.log('📄 Cover letter filename:', coverLetterFilename);
-
-        // SQL Query to insert application
         const query = `
             INSERT INTO applications (
                 full_name, email, phone, location, alx_status, position, 
@@ -187,11 +190,7 @@ app.post('/api/applications', upload.fields([
             consent === 'on' || consent === 'true' || consent === true || false
         ];
 
-        console.log('💾 Inserting into database with values:', values);
-
         const result = await pool.query(query, values);
-        
-        console.log('✅ Application saved with ID:', result.rows[0].id);
         
         res.status(200).json({ 
             success: true, 
@@ -201,8 +200,6 @@ app.post('/api/applications', upload.fields([
         
     } catch (error) {
         console.error('❌ Submission Error:', error.message);
-        console.error('❌ Full error:', error);
-        
         res.status(500).json({ 
             success: false, 
             error: 'Application submission failed.',
@@ -211,20 +208,18 @@ app.post('/api/applications', upload.fields([
     }
 });
 
-// Get all applications (for admin)
+// Get all applications (admin)
 app.get('/api/applications', async (req, res) => {
     try {
-        console.log('📋 Fetching all applications');
         const result = await pool.query('SELECT * FROM applications ORDER BY submitted_at DESC');
-        console.log(`✅ Found ${result.rows.length} applications`);
         res.json(result.rows);
     } catch (error) {
-        console.error('❌ Error fetching applications:', error);
+        console.error('Error fetching applications:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// Update application status (for admin)
+// Update application status
 app.put('/api/applications/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -250,7 +245,7 @@ app.put('/api/applications/:id', async (req, res) => {
     }
 });
 
-// --- PAGE NAVIGATION ROUTES ---
+// --- PAGE ROUTES ---
 app.get('/apply', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/apply.html'));
 });
@@ -259,26 +254,16 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/admin.html'));
 });
 
-// Catch-all route (Keep at the bottom)
-app.get(/.*/, (req, res) => {
+// Catch-all for frontend
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('❌ Server error:', err.stack);
-    res.status(500).json({ 
-        success: false, 
-        error: 'Something went wrong!',
-        details: err.message 
-    });
-});
-
 // --- START SERVER ---
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📄 Homepage: http://localhost:${PORT}`);
-    console.log(`📝 Apply page: http://localhost:${PORT}/apply`);
-    console.log(`🔧 Admin dashboard: http://localhost:${PORT}/admin`);
-    console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌐 URL: https://agricom-careers-portal.onrender.com`);
+    console.log(`📝 Apply: https://agricom-careers-portal.onrender.com/apply`);
+    console.log(`🔧 Admin: https://agricom-careers-portal.onrender.com/admin`);
+    console.log(`🏥 Health: https://agricom-careers-portal.onrender.com/api/health`);
 });
