@@ -21,11 +21,6 @@
         .form-control { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: border-color 0.3s; }
         .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         textarea.form-control { min-height: 120px; resize: vertical; }
-        .file-input-wrapper { position: relative; display: inline-block; width: 100%; }
-        .file-input-label { display: inline-block; padding: 12px 20px; background: #3b82f6; color: white; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
-        .file-input-label:hover { background: #1e3a8a; }
-        input[type="file"] { position: absolute; opacity: 0; width: 0; height: 0; }
-        .file-name { display: inline-block; margin-left: 10px; color: #64748b; font-size: 0.9rem; }
         .checkbox-group { display: flex; align-items: center; gap: 10px; }
         .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
         .radio-group { display: flex; gap: 2rem; margin-top: 0.5rem; }
@@ -66,7 +61,7 @@
                 <p>• <a href="https://agricomassurance.com" target="_blank">Learn more about Agricom Assurance</a></p>
             </div>
             
-            <form id="applicationForm" class="application-form" enctype="multipart/form-data">
+            <form id="applicationForm" class="application-form">
                 <div class="form-section">
                     <h3>Personal Information</h3>
                     <div class="form-group">
@@ -85,6 +80,15 @@
                         <label for="location" class="required">Current Location</label>
                         <input type="text" id="location" name="location" class="form-control" placeholder="City, Rwanda" required>
                     </div>
+                    <div class="form-group">
+                        <label for="alxStatus">ALX Program Status</label>
+                        <select id="alxStatus" name="alxStatus" class="form-control">
+                            <option value="Not specified">Not applicable / Not specified</option>
+                            <option value="Current student">Current ALX student</option>
+                            <option value="ALX graduate">ALX graduate</option>
+                            <option value="Other program">Other program (specify in comments)</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="form-section">
@@ -102,7 +106,11 @@
                     </div>
                     <div class="form-group">
                         <label for="education" class="required">Highest Education & Institution</label>
-                        <input type="text" id="education" name="education" class="form-control" required>
+                        <input type="text" id="education" name="education" class="form-control" placeholder="e.g., BSc Computer Science, University of Rwanda" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentRole">Current Role (if applicable)</label>
+                        <input type="text" id="currentRole" name="currentRole" class="form-control" placeholder="e.g., Junior Developer at Tech Company">
                     </div>
                     <div class="form-group">
                         <label for="experience" class="required">Years of Experience</label>
@@ -119,44 +127,57 @@
                     <h3>Core Competencies</h3>
                     <div class="form-group">
                         <label for="technicalSkills" class="required">Technical Skills</label>
-                        <textarea id="technicalSkills" name="technicalSkills" class="form-control" required></textarea>
+                        <textarea id="technicalSkills" name="technicalSkills" class="form-control" placeholder="List your technical skills, tools, and technologies you're proficient with" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="portfolioLink">Portfolio/LinkedIn URL</label>
-                        <input type="url" id="portfolioLink" name="portfolioLink" class="form-control">
+                        <label for="domainKnowledge">Domain Knowledge (Agriculture/Insurance)</label>
+                        <textarea id="domainKnowledge" name="domainKnowledge" class="form-control" placeholder="Any experience or knowledge in agriculture, insurance, or related fields"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="portfolioLink">Portfolio/LinkedIn/GitHub URL</label>
+                        <input type="url" id="portfolioLink" name="portfolioLink" class="form-control" placeholder="https://">
                     </div>
                 </div>
 
                 <div class="form-section">
                     <h3>Motivation</h3>
                     <div class="form-group">
-                        <label for="motivation" class="required">Why us? (150 words max)</label>
-                        <textarea id="motivation" name="motivation" class="form-control" required></textarea>
+                        <label for="motivation" class="required">Why are you interested in this opportunity? (150 words max)</label>
+                        <textarea id="motivation" name="motivation" class="form-control" placeholder="Tell us why you want to work with Agricom Assurance and what you hope to gain from this experience" required></textarea>
                     </div>
                 </div>
                 
                 <div class="form-section">
-                    <h3>Attachments</h3>
-                    <div class="form-group">
-                        <label for="cv" class="required">Upload CV (PDF/DOC)</label>
-                        <div class="file-input-wrapper">
-                            <label for="cv" class="file-input-label">Choose File</label>
-                            <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required>
-                            <span class="file-name" id="cvFileName">No file chosen</span>
-                        </div>
+                    <h3>CV Submission</h3>
+                    
+                    <div class="info-box" style="margin-bottom: 1.5rem;">
+                        <p><strong>📧 Important: Email Your CV</strong></p>
+                        <p>Please email your CV to:</p>
+                        <ul style="margin: 10px 0 10px 20px; color: #1e3a8a;">
+                            <li><strong>agricomassurance@gmail.com</strong></li>
+                            <li><strong>derricka@agricomassurance.com</strong></li>
+                        </ul>
+                        <p>Include your full name and the position you're applying for in the email subject.</p>
+                        <p>Example: <em>"Application for Data Analyst Position - [Your Full Name]"</em></p>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="coverLetter">Cover Letter (Optional)</label>
-                        <div class="file-input-wrapper">
-                            <label for="coverLetter" class="file-input-label">Choose File</label>
-                            <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx">
-                            <span class="file-name" id="coverLetterFileName">No file chosen</span>
-                        </div>
+                        <label for="cvEmailConfirmation" class="required">CV Email Confirmation</label>
+                        <select id="cvEmailConfirmation" name="cvEmailConfirmation" class="form-control" required>
+                            <option value="">Select an option</option>
+                            <option value="emailed">I have emailed my CV to the addresses above</option>
+                            <option value="will_email">I will email my CV shortly after submitting this form</option>
+                        </select>
+                        <p class="help-text">Please confirm your CV email status</p>
                     </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Consent</h3>
                     <div class="form-group">
                         <div class="checkbox-group">
                             <input type="checkbox" id="consent" name="consent" required>
-                            <label for="consent" class="required">I consent to data processing.</label>
+                            <label for="consent" class="required">I consent to data processing and understand that this information will be used for recruitment purposes only.</label>
                         </div>
                     </div>
                 </div>
@@ -171,50 +192,112 @@
     </div>
     
     <script>
-        // --- 1. File Name Display Logic ---
-        document.getElementById('cv').addEventListener('change', function() {
-            document.getElementById('cvFileName').textContent = this.files[0] ? this.files[0].name : "No file chosen";
-        });
-
-        document.getElementById('coverLetter').addEventListener('change', function() {
-            document.getElementById('coverLetterFileName').textContent = this.files[0] ? this.files[0].name : "No file chosen";
-        });
-
-        // --- 2. Single Form Submission Logic ---
-        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    // --- 1. Form Submission Logic (No file upload) ---
+    document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        console.log('📤 Form submission started');
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        submitBtn.style.opacity = '0.7';
+        
+        // Collect form data (no files)
+        const formData = {
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            location: document.getElementById('location').value,
+            alxStatus: document.getElementById('alxStatus').value,
+            position: document.getElementById('position').value,
+            education: document.getElementById('education').value,
+            currentRole: document.getElementById('currentRole').value || '',
+            experience: document.getElementById('experience').value,
+            technicalSkills: document.getElementById('technicalSkills').value,
+            domainKnowledge: document.getElementById('domainKnowledge').value || '',
+            portfolioLink: document.getElementById('portfolioLink').value,
+            motivation: document.getElementById('motivation').value,
+            cvEmailConfirmation: document.getElementById('cvEmailConfirmation').value,
+            consent: document.getElementById('consent').checked
+        };
+        
+        // Log form data
+        console.log('📋 Form data:', formData);
+        
+        try {
+            console.log('🚀 Sending request to /api/applications');
             
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            const response = await fetch('/api/applications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
             
-            // Use FormData to include the files and all fields automatically
-            const formData = new FormData(this);
+            console.log('📨 Response status:', response.status);
             
+            let result;
             try {
-                const response = await fetch('/api/applications', {
-                    method: 'POST',
-                    // Note: No 'Content-Type' header! Browser sets it for FormData.
-                    body: formData 
-                });
-                
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert('✅ Success: ' + result.message);
-                    window.location.href = '/?submitted=true';
-                } else {
-                    alert('❌ Error: ' + (result.error || 'Submission failed.'));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit Application';
-                }
-            } catch (error) {
-                console.error('Network Error:', error);
-                alert('❌ Network error. Check your server connection.');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Application';
+                result = await response.json();
+                console.log('📊 Response data:', result);
+            } catch (jsonError) {
+                console.error('❌ JSON parse error:', jsonError);
+                throw new Error('Invalid server response');
             }
+
+            if (response.ok && result.success) {
+                console.log('✅ Success:', result.message);
+                alert('✅ ' + result.message);
+                window.location.href = '/?submitted=true&id=' + result.applicationId;
+            } else {
+                console.error('❌ Server error:', result.error);
+                alert('❌ Error: ' + (result.error || result.details || 'Submission failed. Please try again.'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                submitBtn.style.opacity = '1';
+            }
+        } catch (error) {
+            console.error('❌ Network/Fetch error:', error);
+            alert('❌ Network error: ' + error.message + '\nPlease check your connection and try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            submitBtn.style.opacity = '1';
+        }
+    });
+
+    // --- 2. Check if we came from a successful submission ---
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('submitted') === 'true') {
+            console.log('✅ Form was successfully submitted');
+            // Show a success message if redirected from successful submission
+            const successMessage = '✅ Application submitted successfully! Please remember to email your CV to agricomassurance@gmail.com and derricka@agricomassurance.com';
+            alert(successMessage);
+        }
+        
+        // Check for any errors in URL parameters
+        if (urlParams.get('error')) {
+            alert('❌ ' + urlParams.get('error'));
+        }
+    });
+    
+    // --- 3. Form validation feedback ---
+    const form = document.getElementById('applicationForm');
+    form.addEventListener('invalid', function(e) {
+        // Add visual feedback for invalid fields
+        const invalidField = e.target;
+        invalidField.style.borderColor = '#ef4444';
+        invalidField.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+        
+        // Remove the style when user corrects the field
+        invalidField.addEventListener('input', function() {
+            this.style.borderColor = '#e2e8f0';
+            this.style.boxShadow = 'none';
         });
-    </script>
+    }, true);
+</script>
 </body>
 </html>

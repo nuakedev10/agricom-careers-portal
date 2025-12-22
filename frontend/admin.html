@@ -262,6 +262,13 @@
             color: #64748b;
         }
 
+        /* Dashboard Actions */
+        .dashboard-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
         @media (max-width: 768px) {
             .detail-row {
                 grid-template-columns: 1fr;
@@ -279,23 +286,51 @@
             th, td {
                 padding: 0.5rem;
             }
+
+            .dashboard-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* CV Status Styles */
+        .cv-status-emailed {
+            color: #10b981;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .cv-status-will-email {
+            color: #f59e0b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .cv-status-not-specified {
+            color: #94a3b8;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-    <div class="logo-container">
-        <div class="logos-wrapper">
-            <img src="/images/agricom-logo.jpg" alt="Agricom Assurance" class="company-logo">
-            <span class="collaboration-text">×</span>
-            <img src="/images/silo-logo.png" alt="SiLo.Grp" class="company-logo">
-        </div>
-        <h1 class="logo-text">Agricom <span class="logo-assurance">Assurance</span></h1>
-        <div class="collab-text">in collaboration with <span class="silo-text">SiLo.Grp</span></div>
-    </div>
-    <h2 class="page-title">Admin Dashboard - Applications</h2>
-</header>
+            <div class="logo-container">
+                <div class="logos-wrapper">
+                    <img src="/images/agricom-logo.jpg" alt="Agricom Assurance" class="company-logo">
+                    <span class="collaboration-text">×</span>
+                    <img src="/images/silo-logo.png" alt="SiLo.Grp" class="company-logo">
+                </div>
+                <h1 class="logo-text">Agricom <span class="logo-assurance">Assurance</span></h1>
+                <div class="collab-text">in collaboration with <span class="silo-text">SiLo.Grp</span></div>
+            </div>
+            <h2 class="page-title">Admin Dashboard - Applications</h2>
+        </header>
         
         <div class="admin-container">
             <!-- Statistics -->
@@ -313,8 +348,8 @@
                     <div class="stat-number" id="reviewedApps">0</div>
                 </div>
                 <div class="stat-card">
-                    <h3>This Week</h3>
-                    <div class="stat-number" id="weekApps">0</div>
+                    <h3>CVs Emailed</h3>
+                    <div class="stat-number" id="cvEmailed">0</div>
                 </div>
             </div>
 
@@ -342,6 +377,15 @@
                     </select>
                 </div>
                 <div class="filter-group">
+                    <label for="filterCVStatus">Filter by CV Status</label>
+                    <select id="filterCVStatus" class="filter-control">
+                        <option value="">All CV Status</option>
+                        <option value="emailed">CV Emailed</option>
+                        <option value="will_email">Will Email CV</option>
+                        <option value="not_specified">Not Specified</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <button class="action-btn btn-export" onclick="exportToCSV()">📥 Export to CSV</button>
                 </div>
             </div>
@@ -361,8 +405,8 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Position</th>
-                            <th>Experience</th>
                             <th>Status</th>
+                            <th>CV Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -397,6 +441,7 @@
             // Add filter event listeners
             document.getElementById('filterPosition').addEventListener('change', filterApplications);
             document.getElementById('filterStatus').addEventListener('change', filterApplications);
+            document.getElementById('filterCVStatus').addEventListener('change', filterApplications);
         });
 
         async function loadApplications() {
@@ -407,7 +452,17 @@
                     throw new Error('Failed to load applications');
                 }
 
-                allApplications = await response.json();
+                const data = await response.json();
+                
+                // Check if data is an array or has a different structure
+                if (Array.isArray(data)) {
+                    allApplications = data;
+                } else if (data.applications) {
+                    allApplications = data.applications;
+                } else {
+                    allApplications = [];
+                }
+                
                 filteredApplications = allApplications;
                 
                 document.getElementById('loading').style.display = 'none';
@@ -428,16 +483,12 @@
             const total = allApplications.length;
             const pending = allApplications.filter(app => app.status === 'pending').length;
             const reviewed = allApplications.filter(app => app.status === 'reviewed').length;
+            const cvEmailed = allApplications.filter(app => app.cv_email_confirmation === 'emailed').length;
             
-            // Calculate applications from this week
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            const thisWeek = allApplications.filter(app => new Date(app.submitted_at) >= oneWeekAgo).length;
-
             document.getElementById('totalApps').textContent = total;
             document.getElementById('pendingApps').textContent = pending;
             document.getElementById('reviewedApps').textContent = reviewed;
-            document.getElementById('weekApps').textContent = thisWeek;
+            document.getElementById('cvEmailed').textContent = cvEmailed;
         }
 
         function displayApplications(applications) {
@@ -456,13 +507,23 @@
                     day: 'numeric'
                 });
 
+                // CV Status display
+                let cvStatusDisplay = '';
+                if (app.cv_email_confirmation === 'emailed') {
+                    cvStatusDisplay = '<span class="cv-status-emailed">✅ CV Emailed</span>';
+                } else if (app.cv_email_confirmation === 'will_email') {
+                    cvStatusDisplay = '<span class="cv-status-will-email">⏳ Will Email</span>';
+                } else {
+                    cvStatusDisplay = '<span class="cv-status-not-specified">Not specified</span>';
+                }
+
                 row.innerHTML = `
                     <td>${date}</td>
                     <td>${app.full_name}</td>
                     <td>${app.email}</td>
                     <td>${app.position}</td>
-                    <td>${app.experience}</td>
                     <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                    <td>${cvStatusDisplay}</td>
                     <td>
                         <button class="action-btn btn-view" onclick="event.stopPropagation(); viewApplication(${JSON.stringify(app).replace(/"/g, '&quot;')})">View</button>
                     </td>
@@ -477,11 +538,22 @@
         function filterApplications() {
             const positionFilter = document.getElementById('filterPosition').value;
             const statusFilter = document.getElementById('filterStatus').value;
+            const cvStatusFilter = document.getElementById('filterCVStatus').value;
 
             filteredApplications = allApplications.filter(app => {
                 const matchPosition = !positionFilter || app.position === positionFilter;
                 const matchStatus = !statusFilter || app.status === statusFilter;
-                return matchPosition && matchStatus;
+                
+                let matchCVStatus = true;
+                if (cvStatusFilter === 'emailed') {
+                    matchCVStatus = app.cv_email_confirmation === 'emailed';
+                } else if (cvStatusFilter === 'will_email') {
+                    matchCVStatus = app.cv_email_confirmation === 'will_email';
+                } else if (cvStatusFilter === 'not_specified') {
+                    matchCVStatus = !app.cv_email_confirmation || app.cv_email_confirmation === 'Not specified';
+                }
+                
+                return matchPosition && matchStatus && matchCVStatus;
             });
 
             displayApplications(filteredApplications);
@@ -492,6 +564,20 @@
             const modalBody = document.getElementById('modalBody');
 
             const skillsArray = Array.isArray(app.skills) ? app.skills : [];
+
+            // CV Status display for modal
+            let cvStatusDisplay = '';
+            let cvStatusClass = '';
+            if (app.cv_email_confirmation === 'emailed') {
+                cvStatusDisplay = '✅ CV Emailed';
+                cvStatusClass = 'cv-status-emailed';
+            } else if (app.cv_email_confirmation === 'will_email') {
+                cvStatusDisplay = '⏳ Will Email CV';
+                cvStatusClass = 'cv-status-will-email';
+            } else {
+                cvStatusDisplay = 'Not specified';
+                cvStatusClass = 'cv-status-not-specified';
+            }
 
             modalBody.innerHTML = `
                 <div class="detail-section">
@@ -512,11 +598,11 @@
                         <div class="detail-label">Location:</div>
                         <div class="detail-value">${app.location}</div>
                     </div>
+                    <div class="detail-row">
+                        <div class="detail-label">ALX Status:</div>
+                        <div class="detail-value">${app.alx_status || 'Not specified'}</div>
+                    </div>
                 </div>
-                <div class="detail-row">
-        <div class="detail-label">ALX Status:</div>
-        <div class="detail-value">${app.alx_status || 'Not specified'}</div>
-    </div>
 
                 <div class="detail-section">
                     <h3>Position & Background</h3>
@@ -567,14 +653,21 @@
                 </div>
 
                 <div class="detail-section">
-                    <h3>Attachments</h3>
+                    <h3>CV Submission</h3>
                     <div class="detail-row">
-                        <div class="detail-label">CV/Resume:</div>
-                        <div class="detail-value">${app.cv_filename || 'Not uploaded'}</div>
+                        <div class="detail-label">CV Email Status:</div>
+                        <div class="detail-value"><span class="${cvStatusClass}">${cvStatusDisplay}</span></div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Cover Letter:</div>
-                        <div class="detail-value">${app.cover_letter_filename || 'Not uploaded'}</div>
+                        <div class="detail-label">CV Email Instructions:</div>
+                        <div class="detail-value">
+                            <p>Applicant should email CV to:</p>
+                            <ul style="margin: 5px 0 5px 20px;">
+                                <li><strong>agricomassurance@gmail.com</strong></li>
+                                <li><strong>derricka@agricomassurance.com</strong></li>
+                            </ul>
+                            <p><em>Subject: Application for ${app.position} - ${app.full_name}</em></p>
+                        </div>
                     </div>
                 </div>
 
@@ -587,6 +680,10 @@
                     <div class="detail-row">
                         <div class="detail-label">Status:</div>
                         <div class="detail-value"><span class="status-badge status-${app.status}">${app.status}</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Application ID:</div>
+                        <div class="detail-value">#${app.id}</div>
                     </div>
                 </div>
             `;
@@ -614,6 +711,7 @@
             }
 
             const headers = [
+                'ID',
                 'Date Submitted',
                 'Full Name',
                 'Email',
@@ -628,8 +726,9 @@
                 'Portfolio Link',
                 'Motivation',
                 'Skills',
-                'CV Filename',
-                'Status'
+                'CV Email Status',
+                'Status',
+                'ALX Status'
             ];
 
             const csvContent = [
@@ -637,10 +736,11 @@
                 ...filteredApplications.map(app => {
                     const skillsArray = Array.isArray(app.skills) ? app.skills : [];
                     return [
+                        app.id,
                         new Date(app.submitted_at).toLocaleDateString(),
                         `"${app.full_name}"`,
                         app.email,
-                        app.phone,
+                        `"${app.phone}"`,
                         `"${app.location}"`,
                         `"${app.position}"`,
                         `"${app.education}"`,
@@ -651,8 +751,9 @@
                         app.portfolio_link || 'Not provided',
                         `"${app.motivation}"`,
                         `"${skillsArray.join('; ')}"`,
-                        app.cv_filename || 'Not uploaded',
-                        app.status
+                        app.cv_email_confirmation || 'Not specified',
+                        app.status,
+                        app.alx_status || 'Not specified'
                     ].join(',');
                 })
             ].join('\n');
