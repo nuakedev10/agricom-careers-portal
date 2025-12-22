@@ -1,0 +1,775 @@
+:root {
+    --primary-blue: #1e3a8a;
+    --secondary-blue: #3b82f6;
+    --accent-green: #10b981;
+    --light-blue: #dbeafe;
+    --white: #ffffff;
+    --gray-light: #f8fafc;
+    --gray: #64748b;
+    --gray-dark: #334155;
+    --font-primary: 'Poppins', sans-serif;
+    --border-radius: 12px;
+    --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--white) 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: var(--gray-dark);
+    line-height: 1.6;
+}
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(to right, var(--primary-blue), var(--secondary-blue));
+    color: var(--white);
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.logo-text {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.logo-assurance {
+    color: var(--accent-green);
+    font-weight: 600;
+}
+
+.collab-text {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.silo-text {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 4px 12px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    opacity: 0.95;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 1.5rem;
+}
+
+.main-content {
+    padding: 3rem;
+}
+
+.welcome-message h2 {
+    color: var(--primary-blue);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.welcome-message p {
+    font-size: 1.1rem;
+    color: var(--gray);
+    margin-bottom: 2rem;
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.positions-list {
+    background: var(--gray-light);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.positions-list h3 {
+    color: var(--secondary-blue);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.positions-list ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.positions-list li {
+    background: var(--white);
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: var(--transition);
+}
+
+.positions-list li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.cta-section {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.cta-button {
+    display: inline-block;
+    background: linear-gradient(to right, var(--accent-green), #0da271);
+    color: var(--white);
+    padding: 1.2rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.cta-subtext {
+    margin-top: 1rem;
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.footer {
+    background: var(--gray-light);
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--gray);
+    font-size: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        display: block;
+    }
+    
+    .container {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .header {
+        padding: 1.5rem 1rem !important;
+    }
+    
+    .logo-text {
+        font-size: 2.2rem;
+    }
+    
+    .page-title {
+        font-size: 1.4rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+    
+    .main-content {
+        padding: 1.5rem;
+    }
+    
+    .welcome-message h2 {
+        font-size: 1.6rem;
+    }
+    
+    .welcome-message p {
+        font-size: 1rem;
+    }
+    
+    .positions-list {
+        padding: 1.5rem;
+    }
+    
+    .positions-list ul {
+        grid-template-columns: 1fr;
+    }
+    
+    .positions-list li {
+        padding: 0.875rem;
+    }
+    
+    .cta-button {
+        display: block;
+        width: 100%;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 1.8rem;
+    }
+    
+    .collab-text {
+        font-size: 0.95rem;
+    }
+    
+    .positions-list {
+        padding: 1rem;
+    }
+    
+    .positions-list li {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+    
+    .footer {
+        font-size: 0.8rem;
+        padding: 1rem;
+    }
+}
+
+/* Logo Styles */
+.logos-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.company-logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.collaboration-text {
+    font-size: 2rem;
+    font-weight: 300;
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    .logos-wrapper {
+        gap: 1rem;
+    }
+    
+    .company-logo {
+        height: 45px;
+    }
+    
+    .collaboration-text {
+        font-size: 1.5rem;
+    }
+}
+
+/* ========== NEW STYLES FOR DEADLINE, ABOUT SECTION, AND INFO CARDS ========== */
+
+/* Deadline Banner */
+.deadline-banner {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    border: 2px solid #fbbf24;
+}
+
+.deadline-icon {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.deadline-text {
+    font-size: 1.1rem;
+}
+
+/* Logo Styles */
+.logos-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.company-logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.collaboration-text {
+    font-size: 2rem;
+    font-weight: 300;
+    opacity: 0.7;
+}
+
+/* About Section */
+.about-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.about-section h3 {
+    color: #1e3a8a;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.about-section p {
+    color: #334155;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.learn-more {
+    margin-top: 1.5rem;
+}
+
+.learn-more a {
+    color: #3b82f6;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.learn-more a:hover {
+    text-decoration: underline;
+    color: #1e3a8a;
+}
+
+/* Opportunity Section */
+.opportunity-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.opportunity-section h3 {
+    color: #1e3a8a;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.info-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.info-content h4 {
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.info-content p {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Eligibility Banner */
+.eligibility-banner {
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 8px;
+}
+
+.eligibility-banner p {
+    color: #1e3a8a;
+    margin: 0;
+    line-height: 1.7;
+}
+
+/* Process Section */
+.process-section {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 8px;
+}
+
+.process-section h3 {
+    color: #065f46;
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.process-section p {
+    color: #166534;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Footer Links */
+.footer a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: #1e3a8a;
+}
+
+/* Info Box on Apply Page */
+.info-box {
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+.info-box p {
+    margin: 0.5rem 0;
+    color: #1e3a8a;
+    line-height: 1.6;
+}
+
+.info-box strong {
+    color: #1e40af;
+}
+
+.info-box a {
+    color: #1e40af;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.info-box a:hover {
+    text-decoration: underline;
+}
+
+/* Radio Button Styling */
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+}
+
+.radio-option label {
+    cursor: pointer;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Mobile Responsiveness for New Elements */
+@media (max-width: 768px) {
+    .deadline-banner {
+        padding: 0.75rem;
+    }
+    
+    .deadline-text {
+        font-size: 0.95rem;
+    }
+    
+    .deadline-icon {
+        font-size: 1rem;
+    }
+    
+    .logos-wrapper {
+        gap: 1rem;
+    }
+    
+    .company-logo {
+        height: 45px;
+    }
+    
+    .collaboration-text {
+        font-size: 1.5rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .about-section, 
+    .opportunity-section {
+        padding: 1.5rem;
+    }
+    
+    .info-card {
+        padding: 1.25rem;
+    }
+    
+    .eligibility-banner,
+    .process-section {
+        padding: 1.25rem;
+    }
+
+    .radio-group {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .info-box {
+        padding: 1rem;
+    }
+
+    .info-box p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .company-logo {
+        height: 40px;
+        padding: 6px;
+    }
+    
+    .collaboration-text {
+        font-size: 1.2rem;
+    }
+
+    .about-section h3,
+    .opportunity-section h3 {
+        font-size: 1.3rem;
+    }
+
+    .info-content h4 {
+        font-size: 0.95rem;
+    }
+
+    .info-content p {
+        font-size: 0.85rem;
+    }
+}
+
+/* ========== ENHANCED CTA BUTTON STYLES ========== */
+
+.cta-section {
+    text-align: center;
+    margin: 3rem 0 2rem 0;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #10b981 0%, #0da271 100%);
+    color: white;
+    padding: 18px 40px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+    border: none;
+    cursor: pointer;
+    min-width: 300px;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #0da271 0%, #0b8a5f 100%);
+}
+
+.cta-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.button-icon {
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+.cta-subtext {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    line-height: 1.6;
+}
+
+/* Animation for button icon */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Positions List Styling */
+.positions-list {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.positions-list h3 {
+    color: #1e3a8a;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.positions-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.positions-list li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.positions-list li:hover {
+    background: #e0f2fe;
+    transform: translateX(5px);
+}
+
+/* Mobile Responsiveness for CTA */
+@media (max-width: 768px) {
+    .cta-section {
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .cta-button {
+        padding: 16px 30px;
+        font-size: 1.1rem;
+        min-width: 250px;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .positions-list {
+        padding: 1.5rem;
+    }
+    
+    .positions-list li {
+        font-size: 1rem;
+        padding: 0.6rem 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .cta-button {
+        padding: 14px 25px;
+        font-size: 1rem;
+    }
+    
+    .button-icon {
+        font-size: 1.3rem;
+    }
+    
+    .cta-subtext {
+        font-size: 0.85rem;
+    }
+}

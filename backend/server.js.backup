@@ -1,0 +1,29 @@
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const path = require('path');
+
+dotenv.config();
+const applicationsRouter = require('./routes/applications');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.use('/api/applications', applicationsRouter);
+
+app.get('/apply', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/apply.html'));
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`✅ Server on http://localhost:${PORT}`);
+    console.log(`📄 Apply: http://localhost:${PORT}/apply`);
+});

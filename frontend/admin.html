@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Agricom Assurance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .admin-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-number {
+            color: #1e3a8a;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .applications-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-reviewed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-accepted {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-view {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #1e3a8a;
+        }
+
+        .btn-export {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #0da271;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .modal-header h2 {
+            color: #1e3a8a;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h3 {
+            color: #1e3a8a;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .detail-value {
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .detail-row {
+                grid-template-columns: 1fr;
+                gap: 0.25rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+    <div class="logo-container">
+        <div class="logos-wrapper">
+            <img src="/images/agricom-logo.jpg" alt="Agricom Assurance" class="company-logo">
+            <span class="collaboration-text">×</span>
+            <img src="/images/silo-logo.png" alt="SiLo.Grp" class="company-logo">
+        </div>
+        <h1 class="logo-text">Agricom <span class="logo-assurance">Assurance</span></h1>
+        <div class="collab-text">in collaboration with <span class="silo-text">SiLo.Grp</span></div>
+    </div>
+    <h2 class="page-title">Admin Dashboard - Applications</h2>
+</header>
+        
+        <div class="admin-container">
+            <!-- Statistics -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <h3>Total Applications</h3>
+                    <div class="stat-number" id="totalApps">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending Review</h3>
+                    <div class="stat-number" id="pendingApps">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Reviewed</h3>
+                    <div class="stat-number" id="reviewedApps">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>This Week</h3>
+                    <div class="stat-number" id="weekApps">0</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filterPosition">Filter by Position</label>
+                    <select id="filterPosition" class="filter-control">
+                        <option value="">All Positions</option>
+                        <option value="Data Analyst">Data Analyst</option>
+                        <option value="AI Engineer">AI/ML Engineer</option>
+                        <option value="DevOps Engineer">DevOps Engineer</option>
+                        <option value="ArcGIS Specialist">ArcGIS Specialist</option>
+                        <option value="Agricultural Insurance Specialist">Agricultural Insurance Specialist</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">Filter by Status</label>
+                    <select id="filterStatus" class="filter-control">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="reviewed">Reviewed</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button class="action-btn btn-export" onclick="exportToCSV()">📥 Export to CSV</button>
+                </div>
+            </div>
+
+            <!-- Applications Table -->
+            <div class="applications-table">
+                <div id="loading" class="loading">
+                    <p>Loading applications...</p>
+                </div>
+                <div id="noData" class="no-data" style="display: none;">
+                    <p>No applications found.</p>
+                </div>
+                <table id="applicationsTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Position</th>
+                            <th>Experience</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applicationsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Application Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allApplications = [];
+        let filteredApplications = [];
+
+        // Load applications on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadApplications();
+
+            // Add filter event listeners
+            document.getElementById('filterPosition').addEventListener('change', filterApplications);
+            document.getElementById('filterStatus').addEventListener('change', filterApplications);
+        });
+
+        async function loadApplications() {
+            try {
+                const response = await fetch('/api/applications');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load applications');
+                }
+
+                allApplications = await response.json();
+                filteredApplications = allApplications;
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (allApplications.length === 0) {
+                    document.getElementById('noData').style.display = 'block';
+                } else {
+                    updateStatistics();
+                    displayApplications(filteredApplications);
+                }
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: #ef4444;">Error loading applications. Please try again.</p>';
+            }
+        }
+
+        function updateStatistics() {
+            const total = allApplications.length;
+            const pending = allApplications.filter(app => app.status === 'pending').length;
+            const reviewed = allApplications.filter(app => app.status === 'reviewed').length;
+            
+            // Calculate applications from this week
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const thisWeek = allApplications.filter(app => new Date(app.submitted_at) >= oneWeekAgo).length;
+
+            document.getElementById('totalApps').textContent = total;
+            document.getElementById('pendingApps').textContent = pending;
+            document.getElementById('reviewedApps').textContent = reviewed;
+            document.getElementById('weekApps').textContent = thisWeek;
+        }
+
+        function displayApplications(applications) {
+            const tableBody = document.getElementById('applicationsBody');
+            const table = document.getElementById('applicationsTable');
+            
+            tableBody.innerHTML = '';
+
+            applications.forEach(app => {
+                const row = document.createElement('tr');
+                row.onclick = () => viewApplication(app);
+                
+                const date = new Date(app.submitted_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td>${app.full_name}</td>
+                    <td>${app.email}</td>
+                    <td>${app.position}</td>
+                    <td>${app.experience}</td>
+                    <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                    <td>
+                        <button class="action-btn btn-view" onclick="event.stopPropagation(); viewApplication(${JSON.stringify(app).replace(/"/g, '&quot;')})">View</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            table.style.display = 'table';
+        }
+
+        function filterApplications() {
+            const positionFilter = document.getElementById('filterPosition').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            filteredApplications = allApplications.filter(app => {
+                const matchPosition = !positionFilter || app.position === positionFilter;
+                const matchStatus = !statusFilter || app.status === statusFilter;
+                return matchPosition && matchStatus;
+            });
+
+            displayApplications(filteredApplications);
+        }
+
+        function viewApplication(app) {
+            const modal = document.getElementById('detailModal');
+            const modalBody = document.getElementById('modalBody');
+
+            const skillsArray = Array.isArray(app.skills) ? app.skills : [];
+
+            modalBody.innerHTML = `
+                <div class="detail-section">
+                    <h3>Personal Information</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">Full Name:</div>
+                        <div class="detail-value">${app.full_name}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value">${app.email}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Phone:</div>
+                        <div class="detail-value">${app.phone}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Location:</div>
+                        <div class="detail-value">${app.location}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Position & Background</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">Position:</div>
+                        <div class="detail-value">${app.position}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Education:</div>
+                        <div class="detail-value">${app.education}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Current Role:</div>
+                        <div class="detail-value">${app.current_role_text || 'Not specified'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Experience:</div>
+                        <div class="detail-value">${app.experience}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Core Competencies</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">Technical Skills:</div>
+                        <div class="detail-value">${app.technical_skills}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Domain Knowledge:</div>
+                        <div class="detail-value">${app.domain_knowledge || 'Not specified'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Portfolio Link:</div>
+                        <div class="detail-value">${app.portfolio_link ? `<a href="${app.portfolio_link}" target="_blank">${app.portfolio_link}</a>` : 'Not provided'}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Motivation</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">Why AgriTech?</div>
+                        <div class="detail-value">${app.motivation}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Skills Selected:</div>
+                        <div class="detail-value">${skillsArray.join(', ') || 'None selected'}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Attachments</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">CV/Resume:</div>
+                        <div class="detail-value">${app.cv_filename || 'Not uploaded'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Cover Letter:</div>
+                        <div class="detail-value">${app.cover_letter_filename || 'Not uploaded'}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Application Info</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">Submitted:</div>
+                        <div class="detail-value">${new Date(app.submitted_at).toLocaleString()}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value"><span class="status-badge status-${app.status}">${app.status}</span></div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        function exportToCSV() {
+            if (filteredApplications.length === 0) {
+                alert('No applications to export');
+                return;
+            }
+
+            const headers = [
+                'Date Submitted',
+                'Full Name',
+                'Email',
+                'Phone',
+                'Location',
+                'Position',
+                'Education',
+                'Current Role',
+                'Experience',
+                'Technical Skills',
+                'Domain Knowledge',
+                'Portfolio Link',
+                'Motivation',
+                'Skills',
+                'CV Filename',
+                'Status'
+            ];
+
+            const csvContent = [
+                headers.join(','),
+                ...filteredApplications.map(app => {
+                    const skillsArray = Array.isArray(app.skills) ? app.skills : [];
+                    return [
+                        new Date(app.submitted_at).toLocaleDateString(),
+                        `"${app.full_name}"`,
+                        app.email,
+                        app.phone,
+                        `"${app.location}"`,
+                        `"${app.position}"`,
+                        `"${app.education}"`,
+                        `"${app.current_role_text || 'Not specified'}"`,
+                        app.experience,
+                        `"${app.technical_skills}"`,
+                        `"${app.domain_knowledge || 'Not specified'}"`,
+                        app.portfolio_link || 'Not provided',
+                        `"${app.motivation}"`,
+                        `"${skillsArray.join('; ')}"`,
+                        app.cv_filename || 'Not uploaded',
+                        app.status
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `agricom_applications_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

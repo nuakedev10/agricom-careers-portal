@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply - Agricom Assurance Careers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .application-container { 
+            padding: 2rem; 
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover { text-decoration: underline; }
+        
+        .application-form { 
+            max-width: 100%; 
+            margin: 0 auto; 
+        }
+        
+        .form-section {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h3 {
+            color: #1e3a8a;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group { 
+            margin-bottom: 1.5rem; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #334155;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: #ef4444;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background: #1e3a8a;
+        }
+        
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .file-name {
+            display: inline-block;
+            margin-left: 10px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .submit-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 2rem;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover { 
+            background: #0da271; 
+        }
+        
+        .submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .help-text {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .info-box p {
+            margin: 0.5rem 0;
+            color: #1e3a8a;
+        }
+
+        .info-box a {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .application-container {
+                padding: 1rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <div class="logos-wrapper">
+                    <img src="/images/agricom-logo.jpg" alt="Agricom Assurance" class="company-logo">
+                    <span class="collaboration-text">×</span>
+                    <img src="/images/silo-logo.png" alt="SiLo.Grp" class="company-logo">
+                </div>
+                <h1 class="logo-text">Agricom <span class="logo-assurance">Assurance</span></h1>
+                <div class="collab-text">in collaboration with <span class="silo-text">SiLo.Grp</span></div>
+            </div>
+            <h2 class="page-title">Application Form</h2>
+            <div class="deadline-banner">
+                <span class="deadline-icon">⏰</span>
+                <span class="deadline-text">Application Deadline: December 24, 2025</span>
+            </div>
+        </header>
+        
+        <div class="application-container">
+            <a href="/" class="back-link">← Back to Careers Page</a>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <p><strong>📋 Before you apply:</strong></p>
+                <p>• This is a 0-3 month opportunity (January - March 2025)</p>
+                <p>• Modest stipends will be paid at the end of the work period</p>
+                <p>• Open to both students and working professionals</p>
+                <p>• Applications will be reviewed on a rolling basis</p>
+                <p>• <a href="https://agricomassurance.com" target="_blank" rel="noopener noreferrer">Learn more about Agricom Assurance</a></p>
+            </div>
+            
+            <form id="applicationForm" class="application-form">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3>Personal Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="fullName" class="required">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="required">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone" class="required">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="+250 7XX XXX XXX" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location" class="required">Current Location</label>
+                        <input type="text" id="location" name="location" class="form-control" placeholder="City, Rwanda" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="required">Are you currently an ALX learner or alumni based in Rwanda?</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="alxYes" name="alxStatus" value="Yes - ALX Learner" required>
+                                <label for="alxYes">Yes - ALX Learner</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="alxAlumni" name="alxStatus" value="Yes - ALX Alumni" required>
+                                <label for="alxAlumni">Yes - ALX Alumni</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="alxNo" name="alxStatus" value="No" required>
+                                <label for="alxNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Position & Background Section -->
+                <div class="form-section">
+                    <h3>Position & Background</h3>
+                    
+                    <div class="form-group">
+                        <label for="position" class="required">Position Applying For</label>
+                        <select id="position" name="position" class="form-control" required>
+                            <option value="">Select a position</option>
+                            <option value="Data Analyst">Data Analyst</option>
+                            <option value="AI Engineer">AI/ML Engineer</option>
+                            <option value="DevOps Engineer">DevOps Engineer</option>
+                            <option value="ArcGIS Specialist">ArcGIS Specialist</option>
+                            <option value="Agricultural Insurance Specialist">Agricultural Insurance Specialist</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="education" class="required">Highest Education & Institution</label>
+                        <input type="text" id="education" name="education" class="form-control" placeholder="e.g., BSc Computer Science, ALU" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentRole">Current/Most Recent Role & Organization</label>
+                        <input type="text" id="currentRole" name="currentRole" class="form-control" placeholder="e.g., Data Analyst at Company XYZ">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="experience" class="required">Years of Relevant Experience</label>
+                        <select id="experience" name="experience" class="form-control" required>
+                            <option value="">Select experience</option>
+                            <option value="0-1 years">0-1 years</option>
+                            <option value="1-3 years">1-3 years</option>
+                            <option value="3-5 years">3-5 years</option>
+                            <option value="5+ years">5+ years</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Core Competencies Section -->
+                <div class="form-section">
+                    <h3>Core Competencies</h3>
+                    
+                    <div class="form-group">
+                        <label for="technicalSkills" class="required">Technical Skills & Tools</label>
+                        <textarea id="technicalSkills" name="technicalSkills" class="form-control" placeholder="List your technical skills (e.g., Python, SQL, ArcGIS, AWS, TensorFlow...)" required></textarea>
+                        <p class="help-text">Please list the technical skills and tools you are proficient in.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="domainKnowledge">Domain Knowledge</label>
+                        <textarea id="domainKnowledge" name="domainKnowledge" class="form-control" placeholder="Experience in agriculture, insurance, data analysis for social impact..."></textarea>
+                        <p class="help-text">Describe any relevant domain knowledge or industry experience.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="portfolioLink">Portfolio/GitHub/LinkedIn URL</label>
+                        <input type="url" id="portfolioLink" name="portfolioLink" class="form-control" placeholder="https://github.com/yourusername">
+                        <p class="help-text">Provide a link to your portfolio, GitHub, or LinkedIn profile.</p>
+                    </div>
+                </div>
+                
+                <!-- Motivation Section -->
+                <div class="form-section">
+                    <h3>Motivation & Alignment</h3>
+                    
+                    <div class="form-group">
+                        <label for="motivation" class="required">Why are you interested in joining Agricom Assurance and working in AgriTech?</label>
+                        <textarea id="motivation" name="motivation" class="form-control" placeholder="Share your motivation and how you align with our mission (150 words max)..." required></textarea>
+                        <p class="help-text">Maximum 150 words</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Technical Proficiencies (Select all that apply)</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill1" name="skills" value="Python Programming">
+                                <label for="skill1">Python Programming</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill2" name="skills" value="SQL & Databases">
+                                <label for="skill2">SQL & Databases</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill3" name="skills" value="Machine Learning/AI">
+                                <label for="skill3">Machine Learning/AI</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill4" name="skills" value="ArcGIS/Geospatial Analysis">
+                                <label for="skill4">ArcGIS/Geospatial Analysis</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill5" name="skills" value="Cloud Platforms">
+                                <label for="skill5">Cloud Platforms (AWS/Azure/GCP)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill6" name="skills" value="DevOps Tools">
+                                <label for="skill6">DevOps Tools</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill7" name="skills" value="Data Visualization">
+                                <label for="skill7">Data Visualization</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill8" name="skills" value="Insurance/Risk Modeling">
+                                <label for="skill8">Insurance/Risk Modeling</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill9" name="skills" value="Agricultural Systems">
+                                <label for="skill9">Agricultural Systems</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skill10" name="skills" value="Mobile App Development">
+                                <label for="skill10">Mobile App Development</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Attachments Section -->
+                <div class="form-section">
+                    <h3>Attachments</h3>
+                    
+                    <div class="form-group">
+                        <label for="cv" class="required">Upload CV/Resume (PDF or DOC, max 5MB)</label>
+                        <div class="file-input-wrapper">
+                            <label for="cv" class="file-input-label">Choose File</label>
+                            <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required>
+                            <span class="file-name" id="cvFileName">No file chosen</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="coverLetter">Cover Letter (Optional)</label>
+                        <div class="file-input-wrapper">
+                            <label for="coverLetter" class="file-input-label">Choose File</label>
+                            <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx">
+                            <span class="file-name" id="coverLetterFileName">No file chosen</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="consent" name="consent" required>
+                            <label for="consent" class="required">I consent to Agricom Assurance processing my data for recruitment purposes.</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">Submit Application</button>
+            </form>
+        </div>
+        
+        <footer class="footer">
+            <p>© 2024 Agricom Assurance & SiLo.Grp. All rights reserved.</p>
+            <p>
+                <strong>Contact:</strong> 
+                <a href="mailto:juniornuake19@gmail.com">juniornuake19@gmail.com</a> | 
+                <a href="mailto:agricomassurance@gmail.com">agricomassurance@gmail.com</a> | 
+                <a href="mailto:derricka@agricomassurance.com">derricka@agricomassurance.com</a>
+            </p>
+            <p>Kigali, Rwanda | <a href="https://agricomassurance.com" target="_blank" rel="noopener noreferrer">agricomassurance.com</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        // File name display functionality
+        document.getElementById('cv').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            document.getElementById('cvFileName').textContent = fileName;
+        });
+        
+        document.getElementById('coverLetter').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            document.getElementById('coverLetterFileName').textContent = fileName;
+        });
+        
+        // Form submission
+        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            // Collect form data
+            const formData = new FormData(this);
+            
+            // Collect checkbox values for skills
+            const skills = [];
+            document.querySelectorAll('input[name="skills"]:checked').forEach(cb => {
+                skills.push(cb.value);
+            });
+
+            // Get ALX status
+            const alxStatus = document.querySelector('input[name="alxStatus"]:checked')?.value || 'Not specified';
+            
+            // Build application object
+            const data = {
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                location: formData.get('location'),
+                alxStatus: alxStatus,
+                position: formData.get('position'),
+                education: formData.get('education'),
+                currentRole: formData.get('currentRole') || 'Not specified',
+                experience: formData.get('experience'),
+                technicalSkills: formData.get('technicalSkills'),
+                domainKnowledge: formData.get('domainKnowledge') || 'Not specified',
+                portfolioLink: formData.get('portfolioLink') || 'Not provided',
+                motivation: formData.get('motivation'),
+                skills: skills,
+                cvFilename: formData.get('cv')?.name || 'Not uploaded',
+                coverLetterFilename: formData.get('coverLetter')?.name || 'Not uploaded',
+                consent: formData.get('consent') === 'on'
+            };
+            
+            try {
+                const response = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ application: data })
+                });
+                
+                if (response.ok) {
+                    alert('✅ Application submitted successfully! We will review your application and contact you shortly.');
+                    window.location.href = '/?submitted=true';
+                } else {
+                    const errorData = await response.json();
+                    alert('❌ Submission failed: ' + (errorData.error || 'Please try again.'));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Application';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please check your connection and try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
+            }
+        });
+    </script>
+</body>
+</html>
