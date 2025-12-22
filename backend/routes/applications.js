@@ -84,7 +84,6 @@ router.post('/', async (req, res) => {
 // GET: Retrieve all applications (for admin dashboard)
 router.get('/', async (req, res) => {
     try {
-        // UPDATED: Return ALL fields needed for admin dashboard
         const query = `
             SELECT 
                 id,
@@ -92,6 +91,7 @@ router.get('/', async (req, res) => {
                 email,
                 phone,
                 location,
+                alx_status,
                 position,
                 education,
                 current_role_text,
@@ -112,8 +112,6 @@ router.get('/', async (req, res) => {
         `;
         
         const result = await db.query(query);
-        
-        // Return just the array of applications (not wrapped in object)
         res.json(result.rows);
         
     } catch (error) {
