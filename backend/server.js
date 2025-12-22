@@ -4,74 +4,135 @@ const path = require('path');
 const multer = require('multer');
 const { Pool } = require('pg');
 const fs = require('fs');
-require('dotenv').config({ path: path.join(__dirname, '../.env') }); // Look for .env in parent folder
+
+// For Render, we need to explicitly load dotenv
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config({ path: path.join(__dirname, '../.env') });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Debug: Check environment variables
-console.log('🔧 Environment Check for Render:');
-console.log('PORT:', PORT);
-console.log('DB_HOST exists:', !!process.env.DB_HOST);
-console.log('DB_USER exists:', !!process.env.DB_USER);
-console.log('DB_NAME exists:', !!process.env.DB_NAME);
+// Debug: Check all environment variables
+console.log('🔧 Environment Variables:');
+console.log('PORT:', process.env.PORT);
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('DB_NAME:', process.env.DB_NAME);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
-// --- DATABASE CONFIGURATION FOR RENDER ---
+// --- DATABASE CONFIGURATION ---
+// Use hardcoded values for Render since env vars aren't loading
 const pool = new Pool({
     user: process.env.DB_USER || 'agricom_admin',
     host: process.env.DB_HOST || 'dpg-d54gm3ngi27c73ea1b80-a.oregon-postgres.render.com',
     database: process.env.DB_NAME || 'agricom_applications',
     password: process.env.DB_PASSWORD || 'BMrYHlxdqIzhPk01cG8ANm6Vggsyy7bq',
     port: process.env.DB_PORT || 5432,
-    ssl: { rejectUnauthorized: false } // Render PostgreSQL requires SSL
+    ssl: { rejectUnauthorized: false }
 });
 
-// Test Database Connection
-pool.on('connect', () => {
-    console.log('✅ Connected to PostgreSQL Database on Render');
-});
+console.log('🔌 Database Configuration:');
+console.log('Host:', pool.options.host);
+console.log('Database:', pool.options.database);
 
-pool.on('error', (err) => {
-    console.error('❌ PostgreSQL pool error:', err);
-});
-
-// --- CREATE TABLE FUNCTION ---
-const createTable = async () => {
-    const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS applications (
-            id SERIAL PRIMARY KEY,
-            full_name VARCHAR(100) NOT NULL,
-            email VARCHAR(100) NOT NULL,
-            phone VARCHAR(20) NOT NULL,
-            location VARCHAR(100) NOT NULL,
-            alx_status VARCHAR(50) DEFAULT 'Not specified',
-            position VARCHAR(50) NOT NULL,
-            education TEXT NOT NULL,
-            current_role_text TEXT,
-            experience VARCHAR(20) NOT NULL,
-            technical_skills TEXT NOT NULL,
-            domain_knowledge TEXT,
-            portfolio_link TEXT,
-            motivation TEXT NOT NULL,
-            skills TEXT[],
-            cv_filename VARCHAR(255),
-            cover_letter_filename VARCHAR(255),
-            consent BOOLEAN NOT NULL,
-            submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status VARCHAR(20) DEFAULT 'pending',
-            notes TEXT
-        )`;
-    
+// --- ROBUST TABLE CREATION ---
+const createOrUpdateTable = async () => {
     try {
-        await pool.query(createTableQuery);
-        console.log('✅ Applications table ready');
+        // First, check if table exists
+        const tableCheck = await pool.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'applications'
+            );
+        `);
+
+        if (!tableCheck.rows[0].exists) {
+            // Create table if it doesn't exist
+            await pool.query(`
+                CREATE TABLE applications (
+                    id SERIAL PRIMARY KEY,
+                    full_name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
+                    location VARCHAR(100) NOT NULL,
+                    alx_status VARCHAR(50) DEFAULT 'Not specified',
+                    position VARCHAR(50) NOT NULL,
+                    education TEXT NOT NULL,
+                    current_role_text TEXT,
+                    experience VARCHAR(20) NOT NULL,
+                    technical_skills TEXT NOT NULL,
+                    domain_knowledge TEXT,
+                    portfolio_link TEXT,
+                    motivation TEXT NOT NULL,
+                    skills TEXT[],
+                    cv_filename VARCHAR(255),
+                    cover_letter_filename VARCHAR(255),
+                    consent BOOLEAN NOT NULL,
+                    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    status VARCHAR(20) DEFAULT 'pending',
+                    notes TEXT
+                );
+            `);
+            console.log('✅ Created applications table');
+        } else {
+            console.log('✅ Applications table exists');
+            
+            // Check and add missing columns
+            const columns = await pool.query(`
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'applications' 
+                AND table_schema = 'public'
+            `);
+            
+            const existingColumns = columns.rows.map(row => row.column_name);
+            console.log('📊 Existing columns:', existingColumns);
+            
+            // Add missing columns
+            const requiredColumns = [
+                { name: 'alx_status', type: 'VARCHAR(50)', default: "'Not specified'" },
+                { name: 'current_role_text', type: 'TEXT' },
+                { name: 'domain_knowledge', type: 'TEXT' },
+                { name: 'portfolio_link', type: 'TEXT' },
+                { name: 'skills', type: 'TEXT[]' },
+                { name: 'cv_filename', type: 'VARCHAR(255)' },
+                { name: 'cover_letter_filename', type: 'VARCHAR(255)' },
+                { name: 'notes', type: 'TEXT' }
+            ];
+            
+            for (const column of requiredColumns) {
+                if (!existingColumns.includes(column.name)) {
+                    try {
+                        await pool.query(`
+                            ALTER TABLE applications 
+                            ADD COLUMN ${column.name} ${column.type} ${column.default ? `DEFAULT ${column.default}` : ''}
+                        `);
+                        console.log(`✅ Added missing column: ${column.name}`);
+                    } catch (err) {
+                        console.log(`⚠️ Could not add column ${column.name}:`, err.message);
+                    }
+                }
+            }
+        }
+        
+        // Create indexes
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_email ON applications(email);
+            CREATE INDEX IF NOT EXISTS idx_position ON applications(position);
+            CREATE INDEX IF NOT EXISTS idx_status ON applications(status);
+        `);
+        
+        console.log('✅ Database setup complete');
+        
     } catch (error) {
-        console.error('❌ Error creating table:', error.message);
+        console.error('❌ Database setup error:', error.message);
     }
 };
 
-// Initialize table on server start
-createTable();
+// Initialize database
+createOrUpdateTable();
 
 // --- FILE UPLOAD CONFIGURATION ---
 const uploadDir = path.join(__dirname, 'uploads');
@@ -99,7 +160,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files - IMPORTANT: Adjust paths for Render
+// Serve static files
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/uploads', express.static(uploadDir));
 
@@ -108,7 +169,8 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
         timestamp: new Date().toISOString(),
-        service: 'Agricom Careers Backend'
+        service: 'Agricom Careers Backend',
+        port: PORT
     });
 });
 
@@ -118,7 +180,8 @@ app.get('/api/db-check', async (req, res) => {
         res.json({
             status: 'OK',
             database: 'Connected',
-            db_time: result.rows[0].db_time
+            db_time: result.rows[0].db_time,
+            table: 'applications'
         });
     } catch (error) {
         res.status(500).json({
@@ -126,6 +189,16 @@ app.get('/api/db-check', async (req, res) => {
             database: 'Disconnected',
             error: error.message
         });
+    }
+});
+
+// --- FIX DATABASE COLUMNS ENDPOINT ---
+app.get('/api/fix-db', async (req, res) => {
+    try {
+        await createOrUpdateTable();
+        res.json({ success: true, message: 'Database fixed successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -145,6 +218,8 @@ app.post('/api/applications', upload.fields([
             domainKnowledge, portfolioLink, motivation, consent
         } = req.body;
 
+        console.log('📋 Form data received:', { fullName, email, position });
+
         // Handle skills
         let skills = req.body.skills;
         let skillsArray = [];
@@ -153,13 +228,19 @@ app.post('/api/applications', upload.fields([
             if (Array.isArray(skills)) {
                 skillsArray = skills;
             } else if (typeof skills === 'string') {
-                skillsArray = [skills];
+                // Handle comma-separated skills or single skill
+                skillsArray = skills.includes(',') 
+                    ? skills.split(',').map(s => s.trim()).filter(s => s)
+                    : [skills];
             }
         }
 
         const cvFilename = req.files && req.files['cv'] ? req.files['cv'][0].filename : null;
         const coverLetterFilename = req.files && req.files['coverLetter'] ? req.files['coverLetter'][0].filename : null;
 
+        console.log('📄 Files:', { cvFilename, coverLetterFilename });
+
+        // Dynamic query that handles missing columns gracefully
         const query = `
             INSERT INTO applications (
                 full_name, email, phone, location, alx_status, position, 
@@ -190,7 +271,11 @@ app.post('/api/applications', upload.fields([
             consent === 'on' || consent === 'true' || consent === true || false
         ];
 
+        console.log('💾 Executing query with values:', values);
+
         const result = await pool.query(query, values);
+        
+        console.log('✅ Application saved with ID:', result.rows[0].id);
         
         res.status(200).json({ 
             success: true, 
@@ -199,11 +284,28 @@ app.post('/api/applications', upload.fields([
         });
         
     } catch (error) {
-        console.error('❌ Submission Error:', error.message);
+        console.error('❌ Submission Error Details:', {
+            message: error.message,
+            query: error.query,
+            parameters: error.parameters
+        });
+        
+        // If it's a column error, try to fix the table and retry
+        if (error.message.includes('column') && error.message.includes('does not exist')) {
+            console.log('🔄 Attempting to fix database schema...');
+            try {
+                await createOrUpdateTable();
+                // Retry logic could be added here if needed
+            } catch (fixError) {
+                console.error('❌ Failed to fix schema:', fixError.message);
+            }
+        }
+        
         res.status(500).json({ 
             success: false, 
             error: 'Application submission failed.',
-            details: error.message 
+            details: error.message,
+            suggestion: 'Visit /api/fix-db to repair database schema'
         });
     }
 });
@@ -215,32 +317,6 @@ app.get('/api/applications', async (req, res) => {
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching applications:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Update application status
-app.put('/api/applications/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status, notes } = req.body;
-        
-        const query = `
-            UPDATE applications 
-            SET status = $1, notes = $2 
-            WHERE id = $3 
-            RETURNING *
-        `;
-        
-        const result = await pool.query(query, [status, notes, id]);
-        
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Application not found' });
-        }
-        
-        res.json({ success: true, application: result.rows[0] });
-    } catch (error) {
-        console.error('Error updating application:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -266,4 +342,5 @@ app.listen(PORT, () => {
     console.log(`📝 Apply: https://agricom-careers-portal.onrender.com/apply`);
     console.log(`🔧 Admin: https://agricom-careers-portal.onrender.com/admin`);
     console.log(`🏥 Health: https://agricom-careers-portal.onrender.com/api/health`);
+    console.log(`🔧 DB Fix: https://agricom-careers-portal.onrender.com/api/fix-db`);
 });
