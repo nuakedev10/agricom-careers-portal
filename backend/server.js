@@ -1,9 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const multer = require('multer');
 const { Pool } = require('pg');
-const fs = require('fs');
 
 // For Render, we need to explicitly load dotenv
 if (process.env.NODE_ENV !== 'production') {
@@ -35,7 +33,7 @@ console.log('🔌 Database Configuration:');
 console.log('Host:', pool.options.host);
 console.log('Database:', pool.options.database);
 
-// --- ROBUST TABLE CREATION ---
+// --- SIMPLIFIED TABLE CREATION ---
 const createOrUpdateTable = async () => {
     try {
         // First, check if table exists
@@ -48,7 +46,7 @@ const createOrUpdateTable = async () => {
         `);
 
         if (!tableCheck.rows[0].exists) {
-            // Create table if it doesn't exist
+            // Create simplified table (no file columns)
             await pool.query(`
                 CREATE TABLE applications (
                     id SERIAL PRIMARY KEY,
@@ -66,23 +64,29 @@ const createOrUpdateTable = async () => {
                     portfolio_link TEXT,
                     motivation TEXT NOT NULL,
                     skills TEXT[],
-                    cv_data BYTEA,
-                    cv_filename VARCHAR(255),
-                    cv_mimetype VARCHAR(100),
-                    cover_letter_data BYTEA,
-                    cover_letter_filename VARCHAR(255),
-                    cover_letter_mimetype VARCHAR(100),
+                    cv_email_confirmation VARCHAR(50) NOT NULL,
                     consent BOOLEAN NOT NULL,
                     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     status VARCHAR(20) DEFAULT 'pending',
                     notes TEXT
                 );
             `);
-            console.log('✅ Created applications table with file storage');
+            console.log('✅ Created applications table (simplified)');
         } else {
             console.log('✅ Applications table exists');
             
-            // Check and add missing columns
+            // Remove file-related columns if they exist
+            await pool.query(`
+                ALTER TABLE applications 
+                DROP COLUMN IF EXISTS cv_filename,
+                DROP COLUMN IF EXISTS cv_mimetype,
+                DROP COLUMN IF EXISTS cv_data,
+                DROP COLUMN IF EXISTS cover_letter_filename,
+                DROP COLUMN IF EXISTS cover_letter_mimetype,
+                DROP COLUMN IF EXISTS cover_letter_data;
+            `);
+            
+            // Add cv_email_confirmation column if it doesn't exist
             const columns = await pool.query(`
                 SELECT column_name 
                 FROM information_schema.columns 
@@ -91,36 +95,13 @@ const createOrUpdateTable = async () => {
             `);
             
             const existingColumns = columns.rows.map(row => row.column_name);
-            console.log('📊 Existing columns:', existingColumns);
             
-            // Add missing columns for file storage
-            const requiredColumns = [
-                { name: 'alx_status', type: 'VARCHAR(50)', default: "'Not specified'" },
-                { name: 'current_role_text', type: 'TEXT' },
-                { name: 'domain_knowledge', type: 'TEXT' },
-                { name: 'portfolio_link', type: 'TEXT' },
-                { name: 'skills', type: 'TEXT[]' },
-                { name: 'cv_data', type: 'BYTEA' },
-                { name: 'cv_filename', type: 'VARCHAR(255)' },
-                { name: 'cv_mimetype', type: 'VARCHAR(100)' },
-                { name: 'cover_letter_data', type: 'BYTEA' },
-                { name: 'cover_letter_filename', type: 'VARCHAR(255)' },
-                { name: 'cover_letter_mimetype', type: 'VARCHAR(100)' },
-                { name: 'notes', type: 'TEXT' }
-            ];
-            
-            for (const column of requiredColumns) {
-                if (!existingColumns.includes(column.name)) {
-                    try {
-                        await pool.query(`
-                            ALTER TABLE applications 
-                            ADD COLUMN ${column.name} ${column.type} ${column.default ? `DEFAULT ${column.default}` : ''}
-                        `);
-                        console.log(`✅ Added missing column: ${column.name}`);
-                    } catch (err) {
-                        console.log(`⚠️ Could not add column ${column.name}:`, err.message);
-                    }
-                }
+            if (!existingColumns.includes('cv_email_confirmation')) {
+                await pool.query(`
+                    ALTER TABLE applications 
+                    ADD COLUMN cv_email_confirmation VARCHAR(50) DEFAULT 'Not specified'
+                `);
+                console.log('✅ Added cv_email_confirmation column');
             }
         }
         
@@ -140,15 +121,6 @@ const createOrUpdateTable = async () => {
 
 // Initialize database
 createOrUpdateTable();
-
-// --- FILE UPLOAD CONFIGURATION ---
-// Memory storage for multer (files stored in memory, then saved to database)
-const storage = multer.memoryStorage(); // Store files in memory
-
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
-});
 
 // --- MIDDLEWARE ---
 app.use(cors());
@@ -204,132 +176,18 @@ app.get('/api/db-check', async (req, res) => {
     }
 });
 
-// --- FIX DATABASE COLUMNS ENDPOINT ---
-app.get('/api/fix-db', async (req, res) => {
-    try {
-        await createOrUpdateTable();
-        res.json({ success: true, message: 'Database fixed successfully' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// --- FILE DOWNLOAD ENDPOINTS ---
-
-// Download CV
-app.get('/api/files/cv/:id', basicAuth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query(
-            'SELECT cv_filename, cv_mimetype, cv_data FROM applications WHERE id = $1',
-            [id]
-        );
-        
-        if (result.rows.length === 0 || !result.rows[0].cv_data) {
-            return res.status(404).json({ error: 'CV not found' });
-        }
-        
-        const { cv_filename, cv_mimetype, cv_data } = result.rows[0];
-        
-        res.setHeader('Content-Type', cv_mimetype || 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename="${cv_filename}"`);
-        res.send(cv_data);
-        
-    } catch (error) {
-        console.error('Error downloading CV:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Download Cover Letter
-app.get('/api/files/cover-letter/:id', basicAuth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query(
-            'SELECT cover_letter_filename, cover_letter_mimetype, cover_letter_data FROM applications WHERE id = $1',
-            [id]
-        );
-        
-        if (result.rows.length === 0 || !result.rows[0].cover_letter_data) {
-            return res.status(404).json({ error: 'Cover letter not found' });
-        }
-        
-        const { cover_letter_filename, cover_letter_mimetype, cover_letter_data } = result.rows[0];
-        
-        res.setHeader('Content-Type', cover_letter_mimetype || 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename="${cover_letter_filename}"`);
-        res.send(cover_letter_data);
-        
-    } catch (error) {
-        console.error('Error downloading cover letter:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// View CV (inline in browser)
-app.get('/api/files/cv/:id/view', basicAuth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query(
-            'SELECT cv_filename, cv_mimetype, cv_data FROM applications WHERE id = $1',
-            [id]
-        );
-        
-        if (result.rows.length === 0 || !result.rows[0].cv_data) {
-            return res.status(404).json({ error: 'CV not found' });
-        }
-        
-        const { cv_filename, cv_mimetype, cv_data } = result.rows[0];
-        
-        res.setHeader('Content-Type', cv_mimetype || 'application/pdf');
-        res.setHeader('Content-Disposition', `inline; filename="${cv_filename}"`);
-        res.send(cv_data);
-        
-    } catch (error) {
-        console.error('Error viewing CV:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// View Cover Letter (inline in browser)
-app.get('/api/files/cover-letter/:id/view', basicAuth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query(
-            'SELECT cover_letter_filename, cover_letter_mimetype, cover_letter_data FROM applications WHERE id = $1',
-            [id]
-        );
-        
-        if (result.rows.length === 0 || !result.rows[0].cover_letter_data) {
-            return res.status(404).json({ error: 'Cover letter not found' });
-        }
-        
-        const { cover_letter_filename, cover_letter_mimetype, cover_letter_data } = result.rows[0];
-        
-        res.setHeader('Content-Type', cover_letter_mimetype || 'application/pdf');
-        res.setHeader('Content-Disposition', `inline; filename="${cover_letter_filename}"`);
-        res.send(cover_letter_data);
-        
-    } catch (error) {
-        console.error('Error viewing cover letter:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // --- APPLICATION ROUTES ---
 
-// Submit Application
-app.post('/api/applications', upload.fields([
-    { name: 'cv', maxCount: 1 },
-    { name: 'coverLetter', maxCount: 1 }
-]), async (req, res) => {
+// Submit Application (NO FILE UPLOAD)
+app.post('/api/applications', async (req, res) => {
     console.log('📥 Received application submission');
     
     try {
         const {
             fullName, email, phone, location, alxStatus, position, 
             education, currentRole, experience, technicalSkills, 
-            domainKnowledge, portfolioLink, motivation, consent
+            domainKnowledge, portfolioLink, motivation, 
+            cvEmailConfirmation, consent
         } = req.body;
 
         console.log('📋 Form data received:', { fullName, email, position });
@@ -348,41 +206,14 @@ app.post('/api/applications', upload.fields([
             }
         }
 
-        // Handle file uploads
-        let cvData = null;
-        let cvFilename = null;
-        let cvMimetype = null;
-        
-        let coverLetterData = null;
-        let coverLetterFilename = null;
-        let coverLetterMimetype = null;
-
-        if (req.files && req.files['cv']) {
-            const cvFile = req.files['cv'][0];
-            cvData = cvFile.buffer; // Binary data
-            cvFilename = cvFile.originalname;
-            cvMimetype = cvFile.mimetype;
-            console.log('📄 CV uploaded:', cvFilename, 'Size:', cvData.length, 'bytes');
-        }
-
-        if (req.files && req.files['coverLetter']) {
-            const coverLetterFile = req.files['coverLetter'][0];
-            coverLetterData = coverLetterFile.buffer;
-            coverLetterFilename = coverLetterFile.originalname;
-            coverLetterMimetype = coverLetterFile.mimetype;
-            console.log('📄 Cover letter uploaded:', coverLetterFilename, 'Size:', coverLetterData.length, 'bytes');
-        }
-
-        // Insert application with file data
+        // Insert application (no file data)
         const query = `
             INSERT INTO applications (
                 full_name, email, phone, location, alx_status, position, 
                 education, current_role_text, experience, technical_skills, 
                 domain_knowledge, portfolio_link, motivation, skills, 
-                cv_data, cv_filename, cv_mimetype,
-                cover_letter_data, cover_letter_filename, cover_letter_mimetype,
-                consent
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+                cv_email_confirmation, consent
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             RETURNING id;
         `;
 
@@ -401,16 +232,11 @@ app.post('/api/applications', upload.fields([
             portfolioLink || '', 
             motivation || '', 
             skillsArray,
-            cvData,
-            cvFilename,
-            cvMimetype,
-            coverLetterData,
-            coverLetterFilename,
-            coverLetterMimetype,
+            cvEmailConfirmation || 'Not specified',
             consent === 'on' || consent === 'true' || consent === true || false
         ];
 
-        console.log('💾 Executing query...');
+        console.log('💾 Executing query with values:', values);
 
         const result = await pool.query(query, values);
         
@@ -418,7 +244,7 @@ app.post('/api/applications', upload.fields([
         
         res.status(200).json({ 
             success: true, 
-            message: 'Application submitted successfully!', 
+            message: 'Application submitted successfully! Please remember to email your CV to agricomassurance@gmail.com and derricka@agricomassurance.com', 
             applicationId: result.rows[0].id 
         });
         
@@ -436,7 +262,6 @@ app.post('/api/applications', upload.fields([
 // Get all applications (admin) - PROTECTED
 app.get('/api/applications', basicAuth, async (req, res) => {
     try {
-        // Don't include the binary data in the list view (too large)
         const result = await pool.query(`
             SELECT 
                 id,
@@ -454,68 +279,17 @@ app.get('/api/applications', basicAuth, async (req, res) => {
                 portfolio_link,
                 motivation,
                 skills,
-                cv_filename,
-                cv_mimetype,
-                cover_letter_filename,
-                cover_letter_mimetype,
+                cv_email_confirmation,
                 consent,
                 submitted_at,
                 status,
-                notes,
-                cv_data IS NOT NULL as has_cv,
-                cover_letter_data IS NOT NULL as has_cover_letter
+                notes
             FROM applications 
             ORDER BY submitted_at DESC
         `);
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching applications:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Get single application with file info (admin) - PROTECTED
-app.get('/api/applications/:id', basicAuth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query(
-            `SELECT 
-                id,
-                full_name,
-                email,
-                phone,
-                location,
-                alx_status,
-                position,
-                education,
-                current_role_text,
-                experience,
-                technical_skills,
-                domain_knowledge,
-                portfolio_link,
-                motivation,
-                skills,
-                cv_filename,
-                cv_mimetype,
-                cover_letter_filename,
-                cover_letter_mimetype,
-                consent,
-                submitted_at,
-                status,
-                notes,
-                cv_data IS NOT NULL as has_cv,
-                cover_letter_data IS NOT NULL as has_cover_letter
-            FROM applications WHERE id = $1`,
-            [id]
-        );
-        
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Application not found' });
-        }
-        
-        res.json(result.rows[0]);
-    } catch (error) {
-        console.error('Error fetching application:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -568,7 +342,6 @@ app.listen(PORT, () => {
     console.log(`📝 Apply: https://agricom-careers-portal.onrender.com/apply`);
     console.log(`🔧 Admin: https://agricom-careers-portal.onrender.com/admin`);
     console.log(`🏥 Health: https://agricom-careers-portal.onrender.com/api/health`);
-    console.log(`🔧 DB Fix: https://agricom-careers-portal.onrender.com/api/fix-db`);
-    console.log(`\n⚠️ IMPORTANT: Change the admin password in server.js (line ~90)`);
-    console.log(`📁 Files are now stored in DATABASE (not filesystem)`);
+    console.log(`\n⚠️ IMPORTANT: Change the admin password in server.js (line ~80)`);
+    console.log(`📧 Applicants will now email CVs to: agricomassurance@gmail.com & derricka@agricomassurance.com`);
 });
